@@ -10,9 +10,48 @@ from backend.app.schemas.policy import PolicyResponse, PolicyRenewalCreate, Poli
 
 router = APIRouter(prefix="/policies", tags=["Policies & Coverage"])
 
+def sync_policy_coverage_deductions(policy: Policy, db: Session):
+    if not policy:
+        return
+    # Find all claims associated with this policy
+    claims = db.query(Claim).filter(
+        (Claim.policy_number.ilike(policy.policy_number.strip())) |
+        (Claim.policyholder_id == policy.policyholder_id)
+    ).all()
+    total_deducted = 0.0
+    for c in claims:
+        # Deduct claims that are active submitted, approved, paid, or settled
+        status_up = str(c.status or "").upper()
+        is_active_claim = (
+            any(k in status_up for k in ["SUBMIT", "APPROV", "PAID", "SETTLE", "PROCESSING", "CLOSED", "CLAIM READY", "READY"]) and
+            not any(k in status_up for k in ["REJECT", "CORRECT", "DRAFT", "CANCEL"])
+        )
+        if is_active_claim:
+            amt = float(c.estimated_claimable_amount or c.claim_amount or 0.0)
+            total_deducted += amt
+    
+    # Cap total deductions so they never exceed the total sum insured
+    sum_ins = float(policy.sum_insured or 0.0)
+    capped_deducted = min(sum_ins, total_deducted)
+    
+    new_used = round(capped_deducted, 2)
+    new_avail = max(0.0, round(sum_ins - capped_deducted, 2))
+    
+    if policy.used_coverage != new_used or policy.available_coverage != new_avail:
+        policy.used_coverage = new_used
+        policy.available_coverage = new_avail
+        try:
+            db.commit()
+            db.refresh(policy)
+        except Exception:
+            pass
+
 @router.get("", response_model=List[PolicyResponse])
 def get_all_policies(db: Session = Depends(get_db)):
-    return db.query(Policy).limit(200).all()
+    policies = db.query(Policy).limit(200).all()
+    for p in policies:
+        sync_policy_coverage_deductions(p, db)
+    return policies
 
 @router.get("/renewals/history", response_model=List[PolicyRenewalResponse])
 def get_all_renewal_history(
@@ -35,6 +74,7 @@ def get_policy_by_number(policy_number: str, db: Session = Depends(get_db)):
     pol = db.query(Policy).filter(Policy.policy_number.ilike(policy_number.strip())).first()
     if not pol:
         raise HTTPException(status_code=404, detail=f"Policy '{policy_number}' not found")
+    sync_policy_coverage_deductions(pol, db)
     return pol
 
 @router.get("/{policy_number}/renewals", response_model=List[PolicyRenewalResponse])
@@ -45,7 +85,10 @@ def get_renewals_by_policy(policy_number: str, db: Session = Depends(get_db)):
 
 @router.get("/policyholder/{policyholder_id}", response_model=List[PolicyResponse])
 def get_policies_by_policyholder(policyholder_id: str, db: Session = Depends(get_db)):
-    return db.query(Policy).filter(Policy.policyholder_id == policyholder_id).all()
+    policies = db.query(Policy).filter(Policy.policyholder_id == policyholder_id).all()
+    for p in policies:
+        sync_policy_coverage_deductions(p, db)
+    return policies
 
 @router.post("/{policy_number}/renew")
 def renew_and_activate_policy(

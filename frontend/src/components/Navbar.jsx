@@ -68,8 +68,11 @@ const Navbar = ({ onToggleSidebar, activePage, onNavigateTab, onSelectClaim, onS
       if (onSelectClaim) onSelectClaim(recordId);
       if (onNavigateTab) onNavigateTab("claim-analysis");
     } else if (targetTab === "policyholder") {
-      if (onSelectPolicyholder) onSelectPolicyholder(recordId);
-      if (onNavigateTab) onNavigateTab("policyholder");
+      if (onSelectPolicyholder) {
+        onSelectPolicyholder(recordId);
+      } else if (onNavigateTab) {
+        onNavigateTab("policyholder");
+      }
     } else if (onNavigateTab) {
       onNavigateTab(targetTab);
     }
@@ -78,7 +81,7 @@ const Navbar = ({ onToggleSidebar, activePage, onNavigateTab, onSelectClaim, onS
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3 transition-all">
       <div className="flex items-center justify-between gap-4">
-        {/* Left: Mobile Sidebar Toggle + Brand & Page Title */}
+        {/* Left: Mobile Sidebar Toggle */}
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
@@ -86,25 +89,6 @@ const Navbar = ({ onToggleSidebar, activePage, onNavigateTab, onSelectClaim, onS
           >
             <Menu className="w-5 h-5" />
           </button>
-
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 to-teal-500 flex items-center justify-center text-white shadow-md shadow-teal-700/20">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-base font-black tracking-tight text-slate-900 leading-none">
-                  CLAIMGUARD
-                </h1>
-                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-brand-100 text-brand-800 border border-brand-200">
-                  PRO
-                </span>
-              </div>
-              <p className="text-[10px] font-semibold text-slate-500 hidden sm:block mt-0.5">
-                Provider Denial Prevention Assistant
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Center: Global Search Engine with Live Dropdown */}

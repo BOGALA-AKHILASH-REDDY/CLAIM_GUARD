@@ -56,7 +56,8 @@ def sync_claims_with_dataset():
             doc_ver = clean_val(row.get("13. Documentation Verification Status"))
             accuracy = clean_val(row.get("14. Medical/Claim Information Accuracy"))
             dup_check = clean_val(row.get("15. Duplicate Claim Check"))
-            sub_date = clean_val(row.get("16. Claim Submission Date"))
+            raw_sub_date = clean_val(row.get("16. Claim Submission Date"))
+            sub_date = raw_sub_date
 
             # 16-Factor exact mapping
             factors_list = []
@@ -181,6 +182,7 @@ def sync_claims_with_dataset():
                 est_claimable = 0.0
 
             # Update Claim
+            claim.claim_submission_date = sub_date
             claim.confidence_score = conf_score
             claim.risk_level = risk_level
             claim.status = final_status
@@ -190,6 +192,18 @@ def sync_claims_with_dataset():
             claim.estimated_claimable_amount = est_claimable
             claim.pre_auth_status = pre_auth
             claim.notes = f"16-Factor Evaluation: {pass_count} PASS, {warn_count} WARNING, {fail_count} FAIL"
+
+            # Sync policy and payments dates
+            if pol:
+                pol.start_date = st_date_str
+                pol.end_date = end_date_str
+            
+            from backend.app.models.policy import PremiumPayment
+            pm = db.query(PremiumPayment).filter(PremiumPayment.policy_number == pol_num).first()
+            if pm:
+                pm.next_due_date = end_date_str
+                if pm.payment_status == "Paid" and not pm.payment_date:
+                    pm.payment_date = st_date_str
 
             # Update Validations
             db.query(ClaimValidation).filter(ClaimValidation.claim_id == claim_id).delete()

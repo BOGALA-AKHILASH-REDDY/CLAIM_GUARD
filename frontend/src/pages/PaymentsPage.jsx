@@ -6,8 +6,8 @@ import { useAuth } from "../context/AuthContext";
 
 const PaymentsPage = () => {
   const { user } = useAuth();
-  const isPolicyholder = user?.role === "policyholder";
-  const loggedInPid = user?.policyholder_id || user?.user_id;
+  const isPolicyholder = user?.role === "policyholder" || Boolean(user?.policyholder_id);
+  const loggedInPid = user?.policyholder_id || (user?.role === "policyholder" ? user?.user_id : null);
 
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);

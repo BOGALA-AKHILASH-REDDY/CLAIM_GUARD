@@ -33,6 +33,8 @@ def parse_int(val: str, default: int = 0) -> int:
     except Exception:
         return default
 
+
+
 def seed_database(db: Session):
     # Check if already seeded
     if db.query(Policyholder).count() > 0:
@@ -220,9 +222,6 @@ def seed_database(db: Session):
                 
                 # Active vs Inactive logic
                 pol_status = "Active"
-                if "2024" in end_date and "2025" not in end_date and "2026" not in end_date:
-                    # check if passed
-                    pol_status = "Inactive"
 
                 policy_obj = Policy(
                     policy_number=pol_num,
@@ -254,6 +253,28 @@ def seed_database(db: Session):
                 if pay_status in ["Pending", "Overdue", "Grace Period"]:
                     out_amt = prem_amt
 
+                # Calculate next_due_date within the active policy term period
+                try:
+                    p_st_dt = datetime.strptime(st_date, "%Y-%m-%d")
+                    p_end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+                    if pay_freq == "Monthly":
+                        calc_due = p_st_dt + timedelta(days=30)
+                    elif pay_freq == "Quarterly":
+                        calc_due = p_st_dt + timedelta(days=90)
+                    elif pay_freq == "Semi-Annual":
+                        calc_due = p_st_dt + timedelta(days=180)
+                    else: # Annual
+                        calc_due = p_end_dt - timedelta(days=30)
+                    
+                    if calc_due >= p_end_dt:
+                        calc_due = p_end_dt - timedelta(days=30)
+                    if calc_due < p_st_dt:
+                        calc_due = p_st_dt + timedelta(days=30) if (p_st_dt + timedelta(days=30)) < p_end_dt else p_st_dt
+                    
+                    due_date_str = calc_due.strftime("%Y-%m-%d")
+                except Exception:
+                    due_date_str = end_date
+
                 payment_obj = PremiumPayment(
                     payment_id=f"PAY-{pid.replace('POL-', '')}-01",
                     policy_number=pol_num,
@@ -262,7 +283,7 @@ def seed_database(db: Session):
                     payment_frequency=pay_freq,
                     payment_status=pay_status,
                     payment_method=pay_method,
-                    next_due_date=end_date,
+                    next_due_date=due_date_str,
                     outstanding_amount=out_amt,
                     payment_date=st_date if pay_status == "Paid" else None
                 )
@@ -312,7 +333,8 @@ def seed_database(db: Session):
                 doc_ver = clean_val(row.get("13. Documentation Verification Status"))
                 accuracy = clean_val(row.get("14. Medical/Claim Information Accuracy"))
                 dup_check = clean_val(row.get("15. Duplicate Claim Check"))
-                sub_date = clean_val(row.get("16. Claim Submission Date"))
+                raw_sub_date = clean_val(row.get("16. Claim Submission Date"))
+                sub_date = raw_sub_date
 
                 # Get policyholder name
                 ph_rec = db.query(Policyholder).filter(Policyholder.policyholder_id == pid).first()

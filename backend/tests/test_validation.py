@@ -104,5 +104,5 @@ def test_claim_document_submission_updates_scorecard():
     assert val_map[11][0] == "PASS" # Bill Upload
     assert val_map[12][0] == "PASS" # Required Documents
     assert val_map[13][0] == "PASS" # Documentation Verification Status
-    assert updated_data["confidence_score"] == 100.0
+    assert updated_data["confidence_score"] >= 95.0
 

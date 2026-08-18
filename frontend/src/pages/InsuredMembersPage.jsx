@@ -6,8 +6,8 @@ import { useAuth } from "../context/AuthContext";
 
 const InsuredMembersPage = () => {
   const { user } = useAuth();
-  const isPolicyholder = user?.role === "policyholder";
-  const loggedInPid = user?.policyholder_id || user?.user_id;
+  const isPolicyholder = user?.role === "policyholder" || Boolean(user?.policyholder_id);
+  const loggedInPid = user?.policyholder_id || (user?.role === "policyholder" ? user?.user_id : null);
 
   const [policyholders, setPolicyholders] = useState([]);
   const [selectedPhId, setSelectedPhId] = useState(loggedInPid || "POL-1001");
@@ -26,7 +26,7 @@ const InsuredMembersPage = () => {
 
   const fetchPolicyholders = async () => {
     try {
-      const res = await api.get("/policyholders?limit=50");
+      const res = await api.get("/policyholders?limit=200");
       setPolicyholders(res.data);
     } catch (err) {
       console.error(err);

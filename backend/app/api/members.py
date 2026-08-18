@@ -20,19 +20,22 @@ def add_insured_member(policyholder_id: str, member_in: InsuredMemberCreate, db:
     # Generate new member ID
     count = db.query(InsuredMember).filter(InsuredMember.policyholder_id == policyholder_id).count() + 1
     new_m_id = f"{policyholder_id}-M{count:02d}"
+    while db.query(InsuredMember).filter(InsuredMember.member_id == new_m_id).first():
+        count += 1
+        new_m_id = f"{policyholder_id}-M{count:02d}"
 
     new_member = InsuredMember(
         member_id=new_m_id,
         policyholder_id=policyholder_id,
-        name=member_in.name,
-        relationship=member_in.relationship,
+        name=member_in.name.strip(),
+        relationship=member_in.relationship.strip(),
         age=member_in.age,
         dob=member_in.dob,
         gender=member_in.gender,
         eligibility_status=member_in.eligibility_status or "Eligible"
     )
     db.add(new_member)
-    ph.total_members += 1
+    ph.total_members = (ph.total_members or 0) + 1
     db.commit()
     db.refresh(new_member)
     return new_member

@@ -12,6 +12,7 @@ class PolicyTransferRequest(Base):
     nominee_id = Column(String(50), nullable=False)
     nominee_name = Column(String(150), nullable=False)
     relationship = Column(String(50), nullable=False) # Spouse, Son, Daughter, Legal Heir
+    member_id = Column(String(50), nullable=True) # Linked InsuredMember ID
     death_date = Column(String(50), nullable=False)
     death_certificate_doc = Column(String(255), nullable=True)
     verification_status = Column(String(50), default="Pending") # Pending, Verified, Discrepancy Found
@@ -64,6 +65,7 @@ class PolicyBenefitTransfer(Base):
     beneficiary_id = Column(String(50), nullable=False)
     beneficiary_name = Column(String(150), nullable=False)
     relationship = Column(String(50), nullable=False) # Spouse / soulmate, Child, Grandchild, Other
+    member_id = Column(String(50), nullable=True) # Linked InsuredMember ID
     policy_completion_status = Column(String(50), default="Completed 100% Policy Term")
     benefit_usage = Column(String(50), default="0% Claims Made / Unused Benefit")
     transfer_eligibility = Column(String(50), default="Eligible (No Claims Claimed)")

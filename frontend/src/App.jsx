@@ -75,13 +75,13 @@ const AppContent = () => {
       case "payments":
         return <PaymentsPage />;
       case "services-transfer":
-        return <PolicyServicesPage initialTab="transfer" />;
+        return <PolicyServicesPage initialTab="transfer" onNavigateTab={setActiveTab} />;
       case "services-surrender":
-        return <PolicyServicesPage initialTab="surrender" />;
+        return <PolicyServicesPage initialTab="surrender" onNavigateTab={setActiveTab} />;
       case "services-continuation":
-        return <PolicyServicesPage initialTab="continuation" />;
+        return <PolicyServicesPage initialTab="continuation" onNavigateTab={setActiveTab} />;
       case "services-benefit":
-        return <PolicyServicesPage initialTab="benefit" />;
+        return <PolicyServicesPage initialTab="benefit" onNavigateTab={setActiveTab} />;
       case "claims":
         return (
           <ClaimsLandingPage
@@ -103,6 +103,7 @@ const AppContent = () => {
               setActiveTab("claim-analysis");
             }}
             onNavigateBack={() => setActiveTab("claims")}
+            onNavigateTab={setActiveTab}
           />
         );
       case "claim-analysis":
@@ -138,10 +139,12 @@ const AppContent = () => {
   };
 
   const handleSelectTab = (tab) => {
-    if (tab === "policyholder") {
-      setSelectedPolicyholderId(null);
-    }
     setActiveTab(tab);
+  };
+
+  const handleSelectPolicyholder = (pid) => {
+    setSelectedPolicyholderId(pid);
+    setActiveTab("policyholder");
   };
 
   return (
@@ -149,10 +152,7 @@ const AppContent = () => {
       activeTab={activeTab}
       onSelectTab={handleSelectTab}
       onSelectClaim={setSelectedClaimId}
-      onSelectPolicyholder={(pid) => {
-        setSelectedPolicyholderId(pid);
-        setActiveTab("policyholder");
-      }}
+      onSelectPolicyholder={handleSelectPolicyholder}
     >
       {renderActivePage()}
     </MainLayout>

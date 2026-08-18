@@ -11,8 +11,13 @@ router = APIRouter(prefix="/payments", tags=["Premium & Payments"])
 @router.get("", response_model=List[PremiumPaymentResponse])
 def get_all_payments(policyholder_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     query = db.query(PremiumPayment)
-    if policyholder_id:
-        query = query.join(Policy, PremiumPayment.policy_number == Policy.policy_number).filter(Policy.policyholder_id == policyholder_id)
+    if policyholder_id and policyholder_id.strip():
+        query = query.filter(
+            (PremiumPayment.policyholder_id.ilike(policyholder_id.strip())) |
+            (PremiumPayment.policy_number.in_(
+                db.query(Policy.policy_number).filter(Policy.policyholder_id.ilike(policyholder_id.strip()))
+            ))
+        )
     return query.limit(200).all()
 
 @router.get("/{policy_number}", response_model=List[PremiumPaymentResponse])

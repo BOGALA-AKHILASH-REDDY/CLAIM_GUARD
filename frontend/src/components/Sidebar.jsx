@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import {
-  LayoutDashboard, User, Users, HeartPulse, Shield, CreditCard,
+  LayoutDashboard, User, Users, HeartPulse, Shield,
   UserPlus, RefreshCw, AlertOctagon, Gift, PlusCircle, History,
-  FileSearch, CheckSquare, FolderOpen, BarChart3, Settings, LogOut,
+  FileSearch, CheckSquare, FolderOpen, LogOut,
   ChevronDown, ChevronRight, X
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -53,7 +53,6 @@ const Sidebar = ({ activeTab, onSelectTab, isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="text-sm font-black tracking-tight text-slate-900 leading-tight">CLAIMGUARD</h2>
-              <p className="text-[10px] font-semibold text-teal-600 leading-tight">Provider Portal</p>
             </div>
           </div>
           <button
@@ -105,10 +104,6 @@ const Sidebar = ({ activeTab, onSelectTab, isOpen, onClose }) => {
                   <Shield className="w-3.5 h-3.5 shrink-0 text-slate-500" />
                   <span>Policy & Coverage</span>
                 </button>
-                <button onClick={() => { onSelectTab("payments"); onClose(); }} className={navItemClass("payments")}>
-                  <CreditCard className="w-3.5 h-3.5 shrink-0 text-slate-500" />
-                  <span>Premium & Payments</span>
-                </button>
               </div>
             )}
           </div>
@@ -131,7 +126,7 @@ const Sidebar = ({ activeTab, onSelectTab, isOpen, onClose }) => {
                 </button>
                 <button onClick={() => { onSelectTab("services-continuation"); onClose(); }} className={navItemClass("services-continuation")}>
                   <RefreshCw className="w-3.5 h-3.5 shrink-0 text-slate-500" />
-                  <span>Policy Continuation</span>
+                  <span>Policy Continuation (Pre-Claim Check)</span>
                 </button>
                 <button onClick={() => { onSelectTab("services-surrender"); onClose(); }} className={navItemClass("services-surrender")}>
                   <AlertOctagon className="w-3.5 h-3.5 shrink-0 text-slate-500" />
@@ -190,24 +185,12 @@ const Sidebar = ({ activeTab, onSelectTab, isOpen, onClose }) => {
                   <CheckSquare className="w-3.5 h-3.5 shrink-0 text-slate-500" />
                   <span>Recommendations</span>
                 </button>
+                <button onClick={() => { onSelectTab("documents"); onClose(); }} className={navItemClass("documents")}>
+                  <FolderOpen className="w-3.5 h-3.5 shrink-0 text-slate-500" />
+                  <span>Documents</span>
+                </button>
               </div>
             )}
-          </div>
-
-          {/* Group 4: Documents, Reports, Settings */}
-          <div className="pt-2 border-t border-slate-100 space-y-0.5">
-            <button onClick={() => { onSelectTab("documents"); onClose(); }} className={navItemClass("documents")}>
-              <FolderOpen className="w-4 h-4 text-slate-500 shrink-0" />
-              <span>Documents</span>
-            </button>
-            <button onClick={() => { onSelectTab("reports"); onClose(); }} className={navItemClass("reports")}>
-              <BarChart3 className="w-4 h-4 text-slate-500 shrink-0" />
-              <span>Reports & Analytics</span>
-            </button>
-            <button onClick={() => { onSelectTab("settings"); onClose(); }} className={navItemClass("settings")}>
-              <Settings className="w-4 h-4 text-slate-500 shrink-0" />
-              <span>Configured Rules</span>
-            </button>
           </div>
         </div>
 

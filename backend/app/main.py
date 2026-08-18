@@ -14,6 +14,19 @@ from backend.app.api import (
 # Initialize DB models
 Base.metadata.create_all(bind=engine)
 
+# Auto migrate newly added columns to existing tables
+from sqlalchemy import text
+with engine.connect() as conn:
+    for table, col, col_type in [
+        ("policy_transfer_requests", "member_id", "VARCHAR(50)"),
+        ("policy_benefit_transfers", "member_id", "VARCHAR(50)")
+    ]:
+        try:
+            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
+            conn.commit()
+        except Exception:
+            pass
+
 # Auto seed if empty
 db = SessionLocal()
 try:

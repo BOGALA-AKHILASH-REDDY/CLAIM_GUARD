@@ -10,8 +10,8 @@ import { useAuth } from "../context/AuthContext";
 
 const ClaimHistoryPage = ({ onSelectClaim }) => {
   const { user } = useAuth();
-  const isPolicyholder = user?.role === "policyholder";
-  const loggedInPid = user?.policyholder_id || user?.user_id;
+  const isPolicyholder = user?.role === "policyholder" || Boolean(user?.policyholder_id);
+  const loggedInPid = user?.policyholder_id || (user?.role === "policyholder" ? user?.user_id : null);
 
   const [activeLedgerTab, setActiveLedgerTab] = useState("claims"); // "claims" or "renewals"
   const [claims, setClaims] = useState([]);
@@ -26,12 +26,15 @@ const ClaimHistoryPage = ({ onSelectClaim }) => {
   const [viewingClaim, setViewingClaim] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  const [scopeFilter, setScopeFilter] = useState("ALL"); // "ALL" or "MINE"
+  const [scopeFilter, setScopeFilter] = useState("MINE"); // For providers: "ALL" or "MINE"
 
   const fetchClaims = async () => {
     try {
       setLoading(true);
-      const pidParam = scopeFilter === "MINE" && loggedInPid ? `&policyholder_id=${loggedInPid}` : "";
+      // Strict claim isolation: policyholders always filter by their own ID
+      const targetPid = isPolicyholder ? loggedInPid : (scopeFilter === "MINE" ? loggedInPid : "");
+      const pidParam = targetPid ? `&policyholder_id=${targetPid}` : "";
+      
       const res = await api.get(
         `/claims?limit=200${pidParam}${search ? `&search=${search}` : ""}${
           statusFilter !== "ALL" ? `&status=${statusFilter}` : ""
@@ -50,7 +53,8 @@ const ClaimHistoryPage = ({ onSelectClaim }) => {
   const fetchRenewals = async () => {
     try {
       setLoading(true);
-      const pidParam = scopeFilter === "MINE" && loggedInPid ? `?policyholder_id=${loggedInPid}` : "";
+      const targetPid = isPolicyholder ? loggedInPid : (scopeFilter === "MINE" ? loggedInPid : "");
+      const pidParam = targetPid ? `?policyholder_id=${targetPid}` : "";
       const res = await api.get(`/policies/renewals/history${pidParam}`);
       setRenewals(res.data);
     } catch (err) {
@@ -66,7 +70,7 @@ const ClaimHistoryPage = ({ onSelectClaim }) => {
     } else {
       fetchRenewals();
     }
-  }, [search, statusFilter, claimTypeFilter, riskFilter, scopeFilter, loggedInPid, activeLedgerTab]);
+  }, [search, statusFilter, claimTypeFilter, riskFilter, scopeFilter, loggedInPid, isPolicyholder, activeLedgerTab]);
 
   const openClaimDetails = async (claimId) => {
     try {
@@ -87,7 +91,7 @@ const ClaimHistoryPage = ({ onSelectClaim }) => {
         <div>
           <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             <History className="w-5 h-5 text-teal-600" />
-            {isPolicyholder ? `My History & Audit Ledger (${user?.full_name})` : "Claims & Policy History Ledger"}
+            {isPolicyholder ? `My History & Audit Ledger (${user?.full_name || loggedInPid})` : "Claims & Policy History Ledger"}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             {isPolicyholder 
@@ -149,8 +153,8 @@ const ClaimHistoryPage = ({ onSelectClaim }) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
-              {/* Scope Filter */}
-              {loggedInPid && (
+              {/* Scope Filter for Providers / Admins only */}
+              {!isPolicyholder && (
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-slate-500">Scope:</span>
                   <select
@@ -159,9 +163,17 @@ const ClaimHistoryPage = ({ onSelectClaim }) => {
                     className="px-2.5 py-1.5 bg-teal-50 border border-teal-200 text-teal-800 rounded-xl font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
                   >
                     <option value="ALL">All Claim Audits</option>
-                    <option value="MINE">My Claims ({loggedInPid})</option>
+                    {loggedInPid && <option value="MINE">My Claims ({loggedInPid})</option>}
                   </select>
                 </div>
+              )}
+
+              {/* Policyholder active indicator */}
+              {isPolicyholder && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 border border-teal-200 font-bold text-xs">
+                  <UserCheck className="w-3.5 h-3.5 text-teal-600" />
+                  Account: {loggedInPid}
+                </span>
               )}
 
               {/* Claim Type Filter */}

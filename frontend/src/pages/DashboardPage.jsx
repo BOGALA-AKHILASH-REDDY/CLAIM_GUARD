@@ -61,15 +61,18 @@ const DashboardPage = ({ onNavigateTab, onSelectClaim }) => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Good Morning, {user?.full_name || "Dr. Arvind Sharma"}
+              Good Morning, {user?.full_name || "Healthcare Provider"}
             </h1>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Engine Online
             </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 text-[10px] font-bold">
+              Total Registry: {kpis.insured_members_count} Members
+            </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            {data.server_time} • Provider Claim Denial Prevention & Policy Intelligence
+            {data.server_time} • Central Claim Denial Prevention & Policy Intelligence • Total Organization Live Overview
           </p>
         </div>
 
