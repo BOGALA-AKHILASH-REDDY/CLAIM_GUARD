@@ -570,7 +570,7 @@ const ClaimHistoryPage = ({ onSelectClaim }) => {
             {/* Modal Footer */}
             <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
               <a
-                href={`http://127.0.0.1:8000/api/claims/${viewingClaim.claim_id}/pdf`}
+                href={`/api/claims/${viewingClaim.claim_id}/pdf`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition-colors"

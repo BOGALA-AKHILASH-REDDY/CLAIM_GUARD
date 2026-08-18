@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  claimguard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claimguard-app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./claimguard.db
+      - SECRET_KEY=claimguard-secret-super-key-healthcare-hackathon-2026
+    restart: unless-stopped

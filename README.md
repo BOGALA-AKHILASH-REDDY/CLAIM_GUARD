@@ -141,6 +141,27 @@ python -m pytest backend/tests/ -v -W ignore
 
 ---
 
+## 🌐 1-Click Deployment Guide
+
+### Option A: Deploy on Render.com (Recommended — 100% Free)
+1. Go to [Render.com](https://render.com) and click **New + > Web Service**.
+2. Connect your GitHub repository: `https://github.com/BOGALA-AKHILASH-REDDY/CLAIM_GUARD`.
+3. Set the following settings:
+   - **Environment**: `Python 3`
+   - **Build Command**: `cd frontend && npm install && npm run build && cd ../backend && pip install -r requirements.txt`
+   - **Start Command**: `uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT`
+4. Click **Deploy Web Service**. Your app will be live at `https://<your-subdomain>.onrender.com`!
+
+### Option B: Deploy with Docker
+```bash
+# Build and start container in 1 command
+docker-compose up --build -d
+```
+Access at [http://localhost:8000](http://localhost:8000).
+
+
+---
+
 ## 🔑 Demo Credentials
 
 | Role | Username / ID | Password | Access Level |

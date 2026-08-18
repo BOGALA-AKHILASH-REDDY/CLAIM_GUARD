@@ -142,7 +142,7 @@ const ClaimAnalysisPage = ({ selectedClaimId = "CLM-1001" }) => {
             ))}
           </select>
           <a
-            href={`http://127.0.0.1:8000/api/claims/${currentClaimId}/pdf`}
+            href={`/api/claims/${currentClaimId}/pdf`}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition-colors"

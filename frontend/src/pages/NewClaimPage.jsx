@@ -3083,7 +3083,7 @@ const NewClaimPage = ({ onClaimCreated, onViewClaimAnalysis, onNavigateBack, onN
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <a
-                href={`http://127.0.0.1:8000/api/claims/${activeClaimId || submissionSuccess?.claim_id || 'CLM-1001'}/pdf`}
+                href={`/api/claims/${activeClaimId || submissionSuccess?.claim_id || 'CLM-1001'}/pdf`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs shadow-md shadow-teal-600/20 transition-all active:scale-95"
